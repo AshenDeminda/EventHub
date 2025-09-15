@@ -14,7 +14,7 @@
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05);
   width: 100%;
   max-width: 900px;
-  min-height: 550px;
+  min-height: 420px; /* Reduced from 550px */
   display: flex;
   overflow: hidden;
   animation: slideUp 0.6s ease-out;
@@ -96,7 +96,7 @@
 /* Right side with form */
 .auth-right {
   flex: 0 0 60%;
-  padding: 40px;
+  padding: 24px 32px; /* Reduced padding */
   display: flex;
   flex-direction: column;
   justify-content: center;
