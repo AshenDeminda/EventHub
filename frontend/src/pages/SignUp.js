@@ -37,13 +37,16 @@ const SignUp = () => {
     }
 
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password
       });
-      
-      // Redirect to sign in page
+
+      if (response?.status !== 201 || !response?.data?.user) {
+        throw new Error('Invalid registration response');
+      }
+
       navigate('/signin');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');

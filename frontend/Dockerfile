@@ -4,6 +4,10 @@ FROM node:22-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Build-time API base URL for React (Create React App reads at build time)
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=${REACT_APP_API_URL}
+
 # Copy package files
 COPY package*.json ./
 

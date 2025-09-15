@@ -28,12 +28,17 @@ const SignIn = () => {
 
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, formData);
-      
-      // Store token in localStorage
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
-      
-      // Redirect to home page
+
+      const token = response?.data?.token;
+      const user = response?.data?.user;
+
+      if (!token || !user) {
+        throw new Error('Invalid login response');
+      }
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
       navigate('/home');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
