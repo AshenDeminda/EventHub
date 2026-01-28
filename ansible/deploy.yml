@@ -1,5 +1,5 @@
 ---
-- name: Deploy EventHub to EC2 (Option A: build on server)
+- name: Deploy EventHub to EC2 - Option A build on server
   hosts: eventhub
   become: true
 
