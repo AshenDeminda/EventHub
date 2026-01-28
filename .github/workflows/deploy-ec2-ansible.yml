@@ -1,0 +1,64 @@
+name: Deploy to EC2 (Ansible, build on server)
+
+on:
+  push:
+    branches: [ "main" ]
+
+concurrency:
+  group: deploy-ec2
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
+      - name: Configure SSH key + known_hosts
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+      - name: Create Ansible inventory
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          cat > ansible/inventory.ini <<EOF
+          [eventhub]
+          ${EC2_HOST} ansible_user=${EC2_USER} ansible_ssh_private_key_file=~/.ssh/id_rsa
+          EOF
+
+      - name: Deploy via Ansible
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+          MONGO_INITDB_ROOT_USERNAME: ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}
+          MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}
+          MONGO_INITDB_DATABASE: ${{ secrets.MONGO_INITDB_DATABASE }}
+        run: |
+          if [ -z "$REACT_APP_API_URL" ]; then
+            REACT_APP_API_URL="http://${EC2_HOST}:5000"
+          fi
+
+          ansible-playbook -i ansible/inventory.ini ansible/deploy.yml \
+            --extra-vars "repo_url=https://github.com/AshenDeminda/EventHub.git" \
+            --extra-vars "repo_version=main" \
+            --extra-vars "react_app_api_url=${REACT_APP_API_URL}" \
+            --extra-vars "jwt_secret=${JWT_SECRET}" \
+            --extra-vars "mongo_root_username=${MONGO_INITDB_ROOT_USERNAME:-admin}" \
+            --extra-vars "mongo_root_password=${MONGO_INITDB_ROOT_PASSWORD:-password123}" \
+            --extra-vars "mongo_database=${MONGO_INITDB_DATABASE:-event-scheduler}"

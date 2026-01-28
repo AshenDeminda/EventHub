@@ -1,0 +1,4 @@
+[eventhub]
+# Replace with your EC2 public IP or DNS name
+# Example:
+# 3.228.25.195 ansible_user=ubuntu

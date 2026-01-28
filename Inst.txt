@@ -1,0 +1,72 @@
+Dev env:
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+stop:docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+ or:docker compose down -v
+
+
+Production
+docker compose build
+docker compose up -d
+docker compose down
+
+
+
+---------------------------------------------------------------------------------
+git hub images:
+
+build 
+    docker build -t eventhub-backend-gh https://github.com/AshenDeminda/EventHub.git#main:backend
+    docker build -t eventhub-frontend-gh https://github.com/AshenDeminda/EventHub.git#main:frontend
+
+run
+network:
+docker network create eventhub-net || echo "network exists"
+docker network ls
+
+
+    docker run -d --name mongo --network eventhub-net -p 27017:27017 \
+  -e MONGO_INITDB_ROOT_USERNAME=admin \
+  -e MONGO_INITDB_ROOT_PASSWORD=password123 \
+  mongo:7.0
+
+
+  docker run -d --name backend-gh --network eventhub-net \
+  -e NODE_ENV=development \
+  -e PORT=5000 \
+  -e MONGODB_URI=mongodb://admin:password123@mongo:27017/event-scheduler?authSource=admin \
+  -e JWT_SECRET=your-super-secret-jwt-key-change-this-in-production \
+  -e CORS_ORIGIN=http://localhost:8081 \
+  -p 5000:5000 \
+  eventhub-backend-gh
+
+
+  docker run -d --name frontend-gh --network eventhub-net -p 8081:3000 \
+  eventhub-frontend-gh
+
+
+stop    
+    docker stop frontend-gh backend-gh mongo
+    docker rm frontend-gh backend-gh mongo
+
+    docker network rm eventhub-net
+
+
+
+
+
+
+
+--------------------------------------------------------------------------
+docker hub
+
+    docker tag eventhub-backend ashendeminda/eventhub-backend:latest
+    docker push ashendeminda/eventhub-backend:latest
+
+--------------------------------------------------------------------
+Jenkins
+
+sudo systemctl restart jenkins
+http://172.24.114.189:8080/job/EventHub-CI-CD
+
+
+
