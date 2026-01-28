@@ -192,3 +192,9 @@ pnpm-lock.yaml
 
 # Local development
 .local
+"" 
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
