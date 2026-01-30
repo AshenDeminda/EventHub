@@ -22,9 +22,9 @@
     - name: Aggressive cleanup - system prune (preserves volumes)
       shell: docker system prune -af || true
 
-    - name: Copy docker-compose.yml to remote
+    - name: Copy production docker-compose.yml to remote
       copy:
-        src: ../docker-compose.yml
+        src: ../docker-compose.prod.yml
         dest: "{{ dest_dir }}/docker-compose.yml"
         mode: '0644'
 
