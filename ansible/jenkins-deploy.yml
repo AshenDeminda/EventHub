@@ -1,7 +1,6 @@
 ---
 - name: Jenkins-driven deploy to EC2
   hosts: all
-  become: true
   vars:
     dest_dir: /home/ubuntu/app
 
