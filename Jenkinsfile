@@ -29,25 +29,6 @@ pipeline {
             }
         }
         
-        stage('Build Docker Images') {
-            steps {
-                echo '🔨 Building backend and frontend images and saving tars...'
-                sh '''
-                    set -e
-                    mkdir -p build
-                    # Build backend
-                    docker build -t ${DOCKERHUB_USER}/eventhub-backend:latest ./backend
-                    docker tag ${DOCKERHUB_USER}/eventhub-backend:latest ${DOCKERHUB_USER}/eventhub-backend:${BUILD_NUMBER}
-                    docker save ${DOCKERHUB_USER}/eventhub-backend:${BUILD_NUMBER} -o build/backend.tar || true
-
-                    # Build frontend
-                    docker build -t ${DOCKERHUB_USER}/eventhub-frontend:latest ./frontend
-                    docker tag ${DOCKERHUB_USER}/eventhub-frontend:latest ${DOCKERHUB_USER}/eventhub-frontend:${BUILD_NUMBER}
-                    docker save ${DOCKERHUB_USER}/eventhub-frontend:${BUILD_NUMBER} -o build/frontend.tar || true
-                '''
-            }
-        }
-
         stage('Terraform: Init & Apply') {
             steps {
                 echo '🌱 Running Terraform init and apply...'
@@ -71,8 +52,29 @@ pipeline {
                         error 'Could not read server_ip from terraform output'
                     }
                     env.SERVER_IP = server_ip
+                    env.API_URL = "http://${server_ip}:5000"
                     echo "Server IP: ${server_ip}"
+                    echo "API URL: ${env.API_URL}"
                 }
+            }
+        }
+        
+        stage('Build Docker Images') {
+            steps {
+                echo '🔨 Building backend and frontend images and saving tars...'
+                sh '''
+                    set -e
+                    mkdir -p build
+                    # Build backend
+                    docker build -t ${DOCKERHUB_USER}/eventhub-backend:latest ./backend
+                    docker tag ${DOCKERHUB_USER}/eventhub-backend:latest ${DOCKERHUB_USER}/eventhub-backend:${BUILD_NUMBER}
+                    docker save ${DOCKERHUB_USER}/eventhub-backend:${BUILD_NUMBER} -o build/backend.tar || true
+
+                    # Build frontend with API URL pointing to EC2 backend
+                    docker build --build-arg REACT_APP_API_URL=${API_URL} -t ${DOCKERHUB_USER}/eventhub-frontend:latest ./frontend
+                    docker tag ${DOCKERHUB_USER}/eventhub-frontend:latest ${DOCKERHUB_USER}/eventhub-frontend:${BUILD_NUMBER}
+                    docker save ${DOCKERHUB_USER}/eventhub-frontend:${BUILD_NUMBER} -o build/frontend.tar || true
+                '''
             }
         }
 
