@@ -18,23 +18,19 @@
         if [ -f "{{ dest_dir }}/docker-compose.yml" ]; then
           docker-compose -f "{{ dest_dir }}/docker-compose.yml" down || true
         fi
-      args:
-        warn: false
+
 
     - name: Remove all stopped containers (safe-guard)
       shell: docker rm -f $(docker ps -aq) || true
-      args:
-        warn: false
+
 
     - name: Prune unused images
       shell: docker image prune -af || true
-      args:
-        warn: false
+
 
     - name: Prune unused volumes
       shell: docker volume prune -f || true
-      args:
-        warn: false
+
 
     - name: Copy docker-compose.yml to remote
       copy:
@@ -61,16 +57,14 @@
         if [ -f "{{ dest_dir }}/backend.tar" ]; then
           docker load -i "{{ dest_dir }}/backend.tar" || true
         fi
-      args:
-        warn: false
+
 
     - name: Load frontend image (if present)
       shell: |
         if [ -f "{{ dest_dir }}/frontend.tar" ]; then
           docker load -i "{{ dest_dir }}/frontend.tar" || true
         fi
-      args:
-        warn: false
+
 
     - name: Start services via docker-compose
       shell: docker-compose -f "{{ dest_dir }}/docker-compose.yml" up -d --build --remove-orphans
