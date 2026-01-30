@@ -15,9 +15,8 @@
 
     - name: Stop and remove existing containers
       shell: |
-        if [ -f "{{ dest_dir }}/docker-compose.yml" ]; then
-          docker compose -f "{{ dest_dir }}/docker-compose.yml" down || true
-        fi
+        docker stop eventhub-frontend eventhub-backend eventhub-mongodb || true
+        docker rm -f eventhub-frontend eventhub-backend eventhub-mongodb || true
 
     - name: Aggressive cleanup - system prune (preserves volumes)
       shell: docker system prune -af || true
