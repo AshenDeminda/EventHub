@@ -36,8 +36,10 @@
       ignore_errors: true
 
     - name: Load backend image
-      shell: docker load -i "{{ dest_dir }}/backend.tar" || true
-      when: "'backend.tar' is file"
+      shell: |
+        if [ -f "{{ dest_dir }}/backend.tar" ]; then
+          docker load -i "{{ dest_dir }}/backend.tar" || true
+        fi
 
     - name: Delete backend tar to free space
       file:
@@ -52,8 +54,10 @@
       ignore_errors: true
 
     - name: Load frontend image
-      shell: docker load -i "{{ dest_dir }}/frontend.tar" || true
-      when: "'frontend.tar' is file"
+      shell: |
+        if [ -f "{{ dest_dir }}/frontend.tar" ]; then
+          docker load -i "{{ dest_dir }}/frontend.tar" || true
+        fi
 
     - name: Delete frontend tar to free space
       file:
