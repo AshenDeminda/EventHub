@@ -52,7 +52,7 @@ resource "aws_security_group" "eventhub_sg" {
 # 2. Upload your SSH Key to AWS
 resource "aws_key_pair" "deployer" {
   key_name   = "eventhub-key"
-  public_key = file("${path.module}/keys/deployer_key.pub")
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDVJkYhW8bK0ODq2+SlCACfU+A+hoKXx+s1TO7FLjoj7 jenkins@wsl"
 }
 
 # 3. Create the Server (EC2)
