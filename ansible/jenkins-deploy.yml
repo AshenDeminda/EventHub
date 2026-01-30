@@ -39,6 +39,8 @@
       shell: |
         if [ -f "{{ dest_dir }}/backend.tar" ]; then
           docker load -i "{{ dest_dir }}/backend.tar" || true
+          # Retag as latest for docker-compose
+          docker tag ashendeminda/eventhub-backend:$(docker images ashendeminda/eventhub-backend --format "{{.Tag}}" | grep -v latest | head -1) ashendeminda/eventhub-backend:latest || true
         fi
 
     - name: Delete backend tar to free space
@@ -57,6 +59,8 @@
       shell: |
         if [ -f "{{ dest_dir }}/frontend.tar" ]; then
           docker load -i "{{ dest_dir }}/frontend.tar" || true
+          # Retag as latest for docker-compose
+          docker tag ashendeminda/eventhub-frontend:$(docker images ashendeminda/eventhub-frontend --format "{{.Tag}}" | grep -v latest | head -1) ashendeminda/eventhub-frontend:latest || true
         fi
 
     - name: Delete frontend tar to free space
