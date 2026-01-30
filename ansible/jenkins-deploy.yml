@@ -13,24 +13,14 @@
         owner: "{{ ansible_user | default('ubuntu') }}"
         mode: '0755'
 
-    - name: Stop and remove existing containers (if any)
+    - name: Stop and remove existing containers
       shell: |
         if [ -f "{{ dest_dir }}/docker-compose.yml" ]; then
           docker compose -f "{{ dest_dir }}/docker-compose.yml" down || true
         fi
 
-
-    - name: Remove all stopped containers (safe-guard)
-      shell: docker rm -f $(docker ps -aq) || true
-
-
-    - name: Prune unused images
-      shell: docker image prune -af || true
-
-
-    - name: Prune unused volumes
-      shell: docker volume prune -f || true
-
+    - name: Aggressive cleanup - system prune (preserves volumes)
+      shell: docker system prune -af || true
 
     - name: Copy docker-compose.yml to remote
       copy:
@@ -38,35 +28,39 @@
         dest: "{{ dest_dir }}/docker-compose.yml"
         mode: '0644'
 
-    - name: Copy backend image tar from Jenkins workspace
+    - name: Copy backend image tar
       copy:
         src: ../build/backend.tar
         dest: "{{ dest_dir }}/backend.tar"
         mode: '0644'
       ignore_errors: true
 
-    - name: Copy frontend image tar from Jenkins workspace
+    - name: Load backend image
+      shell: docker load -i "{{ dest_dir }}/backend.tar" || true
+      when: "'backend.tar' is file"
+
+    - name: Delete backend tar to free space
+      file:
+        path: "{{ dest_dir }}/backend.tar"
+        state: absent
+
+    - name: Copy frontend image tar
       copy:
         src: ../build/frontend.tar
         dest: "{{ dest_dir }}/frontend.tar"
         mode: '0644'
       ignore_errors: true
 
-    - name: Load backend image (if present)
-      shell: |
-        if [ -f "{{ dest_dir }}/backend.tar" ]; then
-          docker load -i "{{ dest_dir }}/backend.tar" || true
-        fi
+    - name: Load frontend image
+      shell: docker load -i "{{ dest_dir }}/frontend.tar" || true
+      when: "'frontend.tar' is file"
 
+    - name: Delete frontend tar to free space
+      file:
+        path: "{{ dest_dir }}/frontend.tar"
+        state: absent
 
-    - name: Load frontend image (if present)
-      shell: |
-        if [ -f "{{ dest_dir }}/frontend.tar" ]; then
-          docker load -i "{{ dest_dir }}/frontend.tar" || true
-        fi
-
-
-    - name: Start services via docker-compose
-      shell: docker compose -f "{{ dest_dir }}/docker-compose.yml" up -d --build --remove-orphans
+    - name: Start services via docker compose
+      shell: docker compose -f "{{ dest_dir }}/docker-compose.yml" up -d --remove-orphans
       args:
         chdir: "{{ dest_dir }}"
