@@ -16,7 +16,7 @@
     - name: Stop and remove existing containers (if any)
       shell: |
         if [ -f "{{ dest_dir }}/docker-compose.yml" ]; then
-          docker-compose -f "{{ dest_dir }}/docker-compose.yml" down || true
+          docker compose -f "{{ dest_dir }}/docker-compose.yml" down || true
         fi
 
 
@@ -67,6 +67,6 @@
 
 
     - name: Start services via docker-compose
-      shell: docker-compose -f "{{ dest_dir }}/docker-compose.yml" up -d --build --remove-orphans
+      shell: docker compose -f "{{ dest_dir }}/docker-compose.yml" up -d --build --remove-orphans
       args:
         chdir: "{{ dest_dir }}"
