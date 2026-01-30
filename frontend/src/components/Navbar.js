@@ -14,7 +14,7 @@ const Navbar = ({ user, showAuthButtons = false }) => {
   return (
     <nav className="navbar">
       <div className="nav-content">
-        <h1 onClick={() => navigate('/home')}>EventHub</h1>
+        <h1 onClick={() => navigate('/home')}>Event</h1>
         <div className="nav-actions">
           {user ? (
             <>
