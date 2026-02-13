@@ -60,7 +60,8 @@ resource "aws_instance" "app_server" {
   ami           = "ami-04b4f1a9cf54c11d0" # Ubuntu 24.04 (US-East-1)
   instance_type = "t3.micro"              # Free Tier
   key_name      = aws_key_pair.deployer.key_name
-  security_groups = [aws_security_group.eventhub_sg.name]
+  vpc_security_group_ids = [aws_security_group.eventhub_sg.id]
+  associate_public_ip_address = true
 
   # Install Docker automatically when the server starts
   user_data = <<-EOF

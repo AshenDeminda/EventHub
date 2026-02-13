@@ -1,10 +1,25 @@
 ---
 - name: Jenkins-driven deploy to EC2
   hosts: all
+  gather_facts: false
+  become: true
   vars:
     dest_dir: /home/ubuntu/app
 
   tasks:
+    - name: Wait for SSH to become available
+      ansible.builtin.wait_for_connection:
+        delay: 5
+        timeout: 300
+
+    - name: Ensure Docker is installed
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - docker.io
+          - docker-compose-v2
+        state: present
+
     - name: Ensure destination directory exists
       file:
         path: "{{ dest_dir }}"
