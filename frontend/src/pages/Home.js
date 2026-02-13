@@ -105,7 +105,7 @@ const Home = () => {
       <main className="main-content">
         <div className="hero-section">
           <div className="hero-content">
-            <h1>Today's Events</h1>
+            <h1>Your Today's Events</h1>
             <p className="hero-subtitle">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
             <p className="motivational-text">{motivationalPhrases[currentImageIndex]}</p>
           </div>
